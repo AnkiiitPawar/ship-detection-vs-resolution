@@ -1,0 +1,24 @@
+# Training runs, model weights and datasets made by the notebook
+runs/
+ships/
+ships_*m/
+*.pt
+*.onnx
+
+# Airbus data (download it from Kaggle; never commit it)
+airbus-ship-detection/
+train_v2/
+test_v2/
+*.zip
+
+# Python and Jupyter
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# Operating system
+.DS_Store
+Thumbs.db
+desktop.ini

@@ -33,7 +33,26 @@ Small satellites carry small optics, so they see the sea far less sharply than l
 
 ## Results
 
-Results from the full run will appear here.
+First full run on Kaggle, on one Tesla T4: 4,250 training tiles and 750 test tiles holding 1,211 ships. Training took 12 minutes, and the whole notebook ran in about 16.
+
+| Camera | mAP50 | Recall | Precision |
+|---|---|---|---|
+| 1.5 m (the training resolution) | 0.708 | 0.623 | 0.751 |
+| 3 m | 0.659 | 0.582 | 0.737 |
+| 6 m | 0.481 | 0.419 | 0.655 |
+| 12 m (cell 11) | 0.204 | 0.181 | 0.670 |
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="results/score_vs_resolution_dark.png">
+  <img alt="Line chart of mAP50 against camera resolution: 0.71 at 1.5 m, 0.66 at 3 m and 0.48 at 6 m" src="results/score_vs_resolution.png">
+</picture>
+
+- **3 m costs little.** Halving the resolution lowers mAP50 by 7% (0.708 → 0.659).
+- **6 m costs a third.** mAP50 falls by 32% at 6 m, and by 71% at 12 m.
+- **Misses, not false alarms.** Recall falls faster than precision (at 6 m, 0.623 → 0.419 against 0.751 → 0.655, each at its run's best-F1 threshold), so the coarser camera mostly makes the detector miss ships rather than invent them.
+- **Small ships are common.** Of the 7,718 ships in the 5,000 sampled tiles, the median is 37 px long at 1.5 m and one in ten is 11 px or shorter. At 6 m those become about 9 px and under 3 px.
+
+Inference took 4–7 ms per 768 px tile on the T4 during scoring. The notebook also draws one test tile at each resolution (`one_picture.png`); it is not published here, because the competition rules do not allow sharing the Airbus images.
 
 ## Run it on Kaggle
 
@@ -41,7 +60,7 @@ Results from the full run will appear here.
 2. Create a notebook, then **File → Import Notebook** and import `ship_detection_vs_resolution.ipynb` from this repository.
 3. **Add Input → Competitions → Airbus Ship Detection Challenge**.
 4. In the settings, choose **GPU T4 x2** and turn **Internet on** (needed to install Ultralytics and download the YOLO11n weights).
-5. Run the cells in order. Training takes roughly 20–45 minutes on a T4 (estimate).
+5. Run the cells in order. In the first full run, training took 12 minutes on one T4 and the whole notebook about 16.
 
 Outputs are written to `/kaggle/working`: `results.csv`, `one_picture.png` and the training run under `runs/`.
 
@@ -65,6 +84,7 @@ This makes 70 synthetic tiles in the Airbus layout and runs every cell end to en
 
 ## Next steps
 
+- Recall by ship length, to confirm that the ships lost at coarser resolution are the small ones.
 - Retrain on degraded tiles and measure how much of the score comes back.
 - Rotated (oriented) boxes for long, thin ships.
 - Accuracy and speed on an embedded GPU, including INT8.
@@ -78,6 +98,9 @@ This makes 70 synthetic tiles in the Airbus layout and runs every cell end to en
 ```
 ship_detection_vs_resolution.ipynb   the experiment, cell by cell
 requirements.txt                     libraries, for running outside Kaggle
+results/results.csv                  scores from the first full run (written by cell 9)
+results/score_vs_resolution*.png     the chart above, light and dark
+plot_results.py                      draws the chart from results/results.csv
 tests/make_fake_data.py              a tiny fake dataset in the Airbus layout
 tests/run_notebook.py                runs the notebook end to end on it
 ```
